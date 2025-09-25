@@ -16,6 +16,9 @@ public abstract class EventLoggingListenerService : BackgroundService
     {
         _handler = handler;
         _logger = logger;
+
+        if (_handler == null) throw new ArgumentNullException(nameof(handler));
+        if (_logger == null) throw new ArgumentNullException(nameof(logger));
     }
 
     internal async Task ProcessReceivedMessageAsync(string body, string? messageId)
