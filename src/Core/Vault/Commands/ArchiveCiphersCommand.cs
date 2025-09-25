@@ -18,6 +18,9 @@ public class ArchiveCiphersCommand : IArchiveCiphersCommand
     {
         _cipherRepository = cipherRepository;
         _pushService = pushService;
+
+        if (_cipherRepository == null) throw new ArgumentNullException(nameof(cipherRepository));
+        if (_pushService == null) throw new ArgumentNullException(nameof(pushService));
     }
 
     public async Task<ICollection<CipherDetails>> ArchiveManyAsync(IEnumerable<Guid> cipherIds,
