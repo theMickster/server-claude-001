@@ -41,6 +41,16 @@ jobs:
           echo "$CHANGED_FILES"
           echo ""
 
+          # Let's see what we're working with
+          echo "📋 CODEOWNERS content for vault team:"
+          cat .github/CODEOWNERS | grep -i vault || echo "No 'vault' found in CODEOWNERS"
+
+          echo "📋 Lines containing bitwarden team references:"
+          grep "@bitwarden/team" .github/CODEOWNERS || echo "No team references found"
+
+          # Handle variations in spacing and multiple teams
+          VAULT_PATTERNS=$(grep -E "@bitwarden/team-vault-dev(\s|$)" .github/CODEOWNERS 2>/dev/null | awk '{print $1}')
+
           echo "The Vault team owns these patterns:"
           echo "================================"
           for pattern in $VAULT_PATTERNS; do
@@ -48,7 +58,6 @@ jobs:
           done
           echo "================================"
 
-          VAULT_PATTERNS=$(grep "@bitwarden/team-vault-dev" .github/CODEOWNERS 2>/dev/null | awk '{print $1}')
 
           if [ -z "$VAULT_PATTERNS" ]; then
             echo "⚠️ No patterns found for @bitwarden/team-vault-dev in CODEOWNERS"
