@@ -14,6 +14,11 @@ public class NoopAttachmentStorageService : IAttachmentStorageService
 
     public Task CleanupAsync(Guid cipherId)
     {
+        if(cipherId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(cipherId));
+        }
+
         return Task.FromResult(0);
     }
 
