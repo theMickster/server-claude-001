@@ -28,6 +28,7 @@ jobs:
           # Ensure we have the base branch
           git fetch origin ${{ github.base_ref }}
 
+
           echo "Comparing changes between origin/${{ github.base_ref }} and HEAD"
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
 
