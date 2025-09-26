@@ -37,26 +37,8 @@ jobs:
             exit 0
           fi
 
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-          echo ""
-
-          # Let's see what we're working with
-          echo "📋 CODEOWNERS content for vault team:"
-          cat .github/CODEOWNERS | grep -i vault || echo "No 'vault' found in CODEOWNERS"
-
-          echo "📋 Lines containing bitwarden team references:"
-          grep "@bitwarden/team" .github/CODEOWNERS || echo "No team references found"
-
           # Handle variations in spacing and multiple teams
           VAULT_PATTERNS=$(grep -E "@bitwarden/team-vault-dev(\s|$)" .github/CODEOWNERS 2>/dev/null | awk '{print $1}')
-
-          echo "The Vault team owns these patterns:"
-          echo "================================"
-          for pattern in $VAULT_PATTERNS; do
-            echo "  - $pattern"
-          done
-          echo "================================"
 
           if [ -z "$VAULT_PATTERNS" ]; then
             echo "⚠️ No patterns found for @bitwarden/team-vault-dev in CODEOWNERS"
@@ -101,7 +83,7 @@ jobs:
           fi
 
       - name: Review with Claude Code
-        if: false
+        if: steps.check_changes.outputs.vault_team_changes == 'true'
         uses: anthropics/claude-code-action@a5528eec7426a4f0c9c1ac96018daa53ebd05bc4 # v1.0.7
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
