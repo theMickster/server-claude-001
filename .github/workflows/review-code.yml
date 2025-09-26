@@ -58,7 +58,6 @@ jobs:
           done
           echo "================================"
 
-
           if [ -z "$VAULT_PATTERNS" ]; then
             echo "⚠️ No patterns found for @bitwarden/team-vault-dev in CODEOWNERS"
             echo "vault_team_changes=false" >> $GITHUB_OUTPUT
@@ -67,25 +66,38 @@ jobs:
 
           vault_team_changes=false
           for pattern in $VAULT_PATTERNS; do
-            grep_pattern=$(echo "$pattern" | \
-              sed 's/\*\*\//\(^\|\\/\)/' | \
-              sed 's/$/\(\\/\|$\)/' | \
-              sed 's/\*/.*/')
+            echo "Checking pattern: $pattern"
 
-            if echo "$CHANGED_FILES" | grep -qE "$grep_pattern"; then
-              vault_team_changes=true
-              echo "✅ Found files matching pattern: $pattern"
-              echo "$CHANGED_FILES" | grep -E "$grep_pattern"
-              break
+            # Handle **/directory patterns
+            if [[ "$pattern" == "**/"* ]]; then
+              # Remove the **/ prefix
+              dir_pattern="${pattern#\*\*/}"
+              # Check if any file contains this directory in its path
+              if echo "$CHANGED_FILES" | grep -qE "(^|/)${dir_pattern}(/|$)"; then
+                vault_team_changes=true
+                echo "✅ Found files matching pattern: $pattern"
+                echo "$CHANGED_FILES" | grep -E "(^|/)${dir_pattern}(/|$)" | sed 's/^/  - /'
+                break
+              fi
+            else
+              # Handle other patterns (shouldn't happen based on your CODEOWNERS)
+              if echo "$CHANGED_FILES" | grep -q "$pattern"; then
+                vault_team_changes=true
+                echo "✅ Found files matching pattern: $pattern"
+                echo "$CHANGED_FILES" | grep "$pattern" | sed 's/^/  - /'
+                break
+              fi
             fi
           done
 
           echo "vault_team_changes=$vault_team_changes" >> $GITHUB_OUTPUT
 
           if [ "$vault_team_changes" = "true" ]; then
-            echo "✅ Vault team changes detected"
+            echo ""
+            echo "✅ Vault team changes detected - proceeding with review"
           else
-            echo "❌ No Vault team changes detected"
+            echo ""
+            echo "❌  No Vault team changes detected - skipping review"
           fi
 
       - name: Review with Claude Code
