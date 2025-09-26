@@ -28,7 +28,6 @@ jobs:
           # Ensure we have the base branch
           git fetch origin ${{ github.base_ref }}
 
-
           echo "Comparing changes between origin/${{ github.base_ref }} and HEAD"
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
 
@@ -42,6 +41,13 @@ jobs:
           echo "$CHANGED_FILES"
           echo ""
 
+          echo "The Vault team owns these patterns:"
+          echo "================================"
+          for pattern in $VAULT_PATTERNS; do
+            echo "  - $pattern"
+          done
+          echo "================================"
+
           VAULT_PATTERNS=$(grep "@bitwarden/team-vault-dev" .github/CODEOWNERS 2>/dev/null | awk '{print $1}')
 
           if [ -z "$VAULT_PATTERNS" ]; then
@@ -49,13 +55,6 @@ jobs:
             echo "vault_team_changes=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-
-          echo "The Vault team owns these patterns:"
-          echo "================================"
-          for pattern in $VAULT_PATTERNS; do
-            echo "  - $pattern"
-          done
-          echo "================================"
 
           vault_team_changes=false
           for pattern in $VAULT_PATTERNS; do
@@ -81,7 +80,7 @@ jobs:
           fi
 
       - name: Review with Claude Code
-        if: steps.check_changes.outputs.vault_team_changes == 'true'
+        if: false
         uses: anthropics/claude-code-action@a5528eec7426a4f0c9c1ac96018daa53ebd05bc4 # v1.0.7
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
